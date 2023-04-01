@@ -5,14 +5,39 @@
 
 
 void bubbleSortAsm( uint64_t arr[], uint64_t n ) {
+	// Input variables...
+	//   arr is in rdi
+	//   n is in rsi
+	//
+	// Register allocation...
+	//   rsi = Outer counter
+	//   rdi = Inner counter
+	//   rcx = Current pointer
+	//   rax = Compare 1
+	//   rdx = Compare 2
+	
 
    // Assumes dwSomeValue is not zero.
    asm (
-      "mov r9, %1 \n\t"   // Outer counter
-      "dec r9     \n\t"
-      "outerLoop:  \n\t"
+      "mov rsi, %1       \n\t"   // Outer counter
+      "dec rsi           \n\t"
+      "outerLoop:        \n\t"
       
-//   	"mov rcx, %1 \n\t"  // Inner counter
+   	"xor rdi, rdi      \n\t"   // Inner counter = 0
+      "mov rcx, %0       \n\t"   // Reset current pointer
+      "mov rax, [rcx]    \n\t"
+      "add rcx, 8        \n\t"
+   	
+   	"innerLoop:        \n\t"
+   	"mov rdx, [rcx]    \n\t"
+//   	"add rcx, 8        \n\t"
+   	
+   	// do our thing
+   	
+   	"inc rdi         \n\t"
+   	"cmp rdi, rsi    \n\t"
+   	"jb  innerLoop   \n\t"
+   	
 //   	"mov rdx, %0 \n\t"  // Inner current
 //   	"mov rax, [rdx]  \n\t"
 //   	"add rdx, 8 \n\t"        // Increment current
@@ -27,12 +52,12 @@ void bubbleSortAsm( uint64_t arr[], uint64_t n ) {
 //   	"dec  rcx \n\t"
  //  	"jnz  innerLoop  \n\t"
    	
-   	"dec r9        \n\t"
-   	"jnz outerLoop \n\t"
+   	"dec rsi           \n\t"
+   	"jnz outerLoop     \n\t"
    	
      :                       /* Output   */
-     : "r" (arr), "r" (n)    /* Input    */
-     : );                    /* Clobbers */
+     : "r" (arr), "U" (n)    /* Input    */
+     : "cc", "memory", "rsi", "rdi", "rcx", "rax" );  /* Clobbers */
 
 }
 
@@ -64,8 +89,8 @@ void doRun( size_t n ) {
 	}
 	
 	clock_gettime(CLOCK_MONOTONIC, &tstart);
-	// bubbleSortAsm( randomList, n ) ;
-	bubbleSort( randomList, n ) ;
+	bubbleSortAsm( randomList, n ) ;
+	// bubbleSort( randomList, n ) ;
 	clock_gettime(CLOCK_MONOTONIC, &tend);
 	
 	printf("%zu: bubbleSort took about %.5f seconds\n", n, 
@@ -79,7 +104,7 @@ void doRun( size_t n ) {
 int main() {
 	printf( "Bubble Sort\n" ) ;
 	
-	for( size_t i = 0 ; i < 30 ; i++ ) {
+	for( size_t i = 4 ; i < 30 ; i++ ) {
 		doRun( 1<<i ) ;	
 	}
 }
