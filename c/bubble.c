@@ -88,6 +88,9 @@ void doRun( size_t n ) {
 		// printf( "%lu\n", randomList[i]) ;
 	}
 	
+	randomList[0] = 0x1122334455667788 ;
+	randomList[1] = 0x99aabbccddeeff11 ;
+	
 	clock_gettime(CLOCK_MONOTONIC, &tstart);
 	bubbleSortAsm( randomList, n ) ;
 	// bubbleSort( randomList, n ) ;
