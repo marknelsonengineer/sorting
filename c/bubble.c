@@ -90,15 +90,22 @@ void doRun( size_t n ) {
 	
 	randomList[0] = 0x1122334455667788 ;
 	randomList[1] = 0x99aabbccddeeff11 ;
+
+	for( size_t i = 0 ; i < 8 ; i++ ) {
+		printf( "%zu: %p %lx\n", i, &randomList[i], randomList[i] ) ;
+	}
+
 	
 	clock_gettime(CLOCK_MONOTONIC, &tstart);
-	bubbleSortAsm( randomList, n ) ;
+	// bubbleSortAsm( randomList, n ) ;
 	// bubbleSort( randomList, n ) ;
 	clock_gettime(CLOCK_MONOTONIC, &tend);
 	
 	printf("%zu: bubbleSort took about %.5f seconds\n", n, 
            ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
            ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
+	
+	
 	
 	free( randomList ) ; 
 }
