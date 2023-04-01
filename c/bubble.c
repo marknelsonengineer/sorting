@@ -30,34 +30,30 @@ void bubbleSortAsm( uint64_t arr[], uint64_t n ) {
    	
    	"innerLoop:        \n\t"
    	"mov rdx, [rcx]    \n\t"
-//   	"add rcx, 8        \n\t"
    	
-   	// do our thing
+   	// do the compare
    	
-   	"inc rdi         \n\t"
-   	"cmp rdi, rsi    \n\t"
-   	"jb  innerLoop   \n\t"
+   	"cmp rdx, rax      \n\t"
+   	"ja inOrder        \n\t"
+   	"xchg rdx, rax     \n\t"
+   	"mov  [rcx-8], rax \n\t"
+   	"mov  [rcx],   rdx \n\t"
    	
-//   	"mov rdx, %0 \n\t"  // Inner current
-//   	"mov rax, [rdx]  \n\t"
-//   	"add rdx, 8 \n\t"        // Increment current
+   	"inOrder:          \n\t"
+
+   	"add rcx, 8        \n\t"
+   	"mov rax, rdx      \n\t"
    	
-//   	"innerLoop: \n\t"
-//   	"mov rdi, [rdx] \n\t"
-//   	"cmp rax, rdi \n\t"
-//   	"jz  sorted   \n\t"
-//   	"xchg rax, rdi  \n\t"
-//   	"sorted:        \n\t"
-//   	"mov rax, rdi \n\t"
-//   	"dec  rcx \n\t"
- //  	"jnz  innerLoop  \n\t"
+   	"inc rdi           \n\t"
+   	"cmp rdi, rsi      \n\t"
+   	"jb  innerLoop     \n\t"
    	
    	"dec rsi           \n\t"
    	"jnz outerLoop     \n\t"
    	
      :                       /* Output   */
      : "r" (arr), "U" (n)    /* Input    */
-     : "cc", "memory", "rsi", "rdi", "rcx", "rax" );  /* Clobbers */
+     : "cc", "memory", "rsi", "rdi", "rcx", "rax", "rdx" );  /* Clobbers */
 
 }
 
@@ -75,35 +71,41 @@ void bubbleSort(uint64_t arr[], size_t n) {
 	}
 }
 
+void printSampleData( uint64_t* randomList, size_t n ) {
+	for( size_t i = 0 ; i < 6 ; i++ ) {
+		printf( "%4zu: %20p %20lx\n", i, &randomList[i], randomList[i] ) ;
+	}
+
+	for( size_t i = n - 6 ; i < n ; i++ ) {
+		printf( "%4zu: %20p %20lx\n", i, &randomList[i], randomList[i] ) ;
+	}
+}
+
+
 //@todo alignment
 
 void doRun( size_t n ) {
-	unsigned long* randomList = (unsigned long*) calloc( n, sizeof( uint64_t ) );
+	uint64_t* randomList = (uint64_t*) calloc( n, sizeof( uint64_t ) );
 	
 	struct timespec tstart={0,0}, tend={0,0};
 	
 	
 	for( size_t i = 0 ; i < n ; i++ ) {
-		randomList[i] = (((uint64_t)rand())<<32) + ((uint64_t)rand()) ;
+		randomList[i] = (((uint64_t)rand())<<33) + ((uint64_t)rand()) ;
 		// printf( "%lu\n", randomList[i]) ;
 	}
-	
-	randomList[0] = 0x1122334455667788 ;
-	randomList[1] = 0x99aabbccddeeff11 ;
-
-	for( size_t i = 0 ; i < 8 ; i++ ) {
-		printf( "%zu: %p %lx\n", i, &randomList[i], randomList[i] ) ;
-	}
-
-	
+		
 	clock_gettime(CLOCK_MONOTONIC, &tstart);
-	// bubbleSortAsm( randomList, n ) ;
+	bubbleSortAsm( randomList, n ) ;
 	// bubbleSort( randomList, n ) ;
 	clock_gettime(CLOCK_MONOTONIC, &tend);
+
+	// printSampleData( randomList, n ) ;
 	
 	printf("%zu: bubbleSort took about %.5f seconds\n", n, 
            ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
            ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
+
 	
 	
 	
