@@ -1,0 +1,9 @@
+# .gitignore
+
+*.s
+
+.DS_Store
+.gdb_history
+
+bubble
+squeeze
