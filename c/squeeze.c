@@ -44,26 +44,24 @@ void squeezeSortAsm( uint64_t arr[], uint64_t n ) {
 
    // Assumes dwSomeValue is not zero.
    asm (
-   	"nop; "
+   	"mov rdi, %0; "   // rdi = arr
+   	
    	"xor r15, r15; "  // i_front = 0;
    	"mov r14, %1; "   // i_back = n - 1;
-   	"dec r14;     "   //
-   	"mov [0], rax; "  // Force a segfault
+   	"dec r14;     "
 
    	"outer_loop:; " // while( i_front < i_back ) {}
    	
    	"xor r13, r13; "  // max_value = 0;
-//   	"mov r11, 0xdeadbeef; "   // min_value = UINT64_MAX;
    	"xor r11, r11; "  // min_value = UINT64_MAX;
-//   	"dec r11; "
-//   	"mov [0], rax; "  // Force a segfault
+   	"dec r11; "
    	
    	// Find i_max & i_min
    	                   // for( size_t j = i_front ; j <= i_back ; j++ ) {
    	"mov r9, r15; "    // j = i_front;
    	"inner_loop:; "
    	
-   	"mov r8, [%0 + r9*8]; "
+   	"mov r8, [rdi + r9*8]; "
    	"cmp r8, r13; "  // if( arr[j] > max_value )
    	"jng not_max; "
    	   "mov r12, r9; "    // max_index = j;
@@ -88,8 +86,10 @@ void squeezeSortAsm( uint64_t arr[], uint64_t n ) {
    	"cmp r10, r15; "    // if( min_index != i_front )
    	"jz min_is_already_in_front; "
    	   // exchangeValues( &arr[min_index], &arr[i_front] );
-   	   // "mov rax, [%0 + r10*8]; "
-   	   "mov rbx, [%0 + r15*8]; "
+   	   "mov rax, [rdi + r10*8]; "
+   	   "mov rbx, [rdi + r15*8]; "
+   	   "mov [rdi + r10*8], rbx; "
+   	   "mov [rdi + r15*8], rax; "
    	"min_is_already_in_front:; "
    	
    	"cmp r13, r15; "  // if( max_index == i_front )
@@ -100,10 +100,10 @@ void squeezeSortAsm( uint64_t arr[], uint64_t n ) {
    	"cmp r12, r14; "  // if( max_index != i_back )
    	"jz max_is_already_in_back; "
    	   // exchangeValues( &arr[max_index], &arr[i_back] );
-   	   "mov rax, [%0 + r12*8]; "
-   	   "mov rbx, [%0 + r14*8]; "
-   	   "mov [%0 + r12*8], rbx; "
-   	   "mov [%0 + r14*8], rax; "
+   	   "mov rax, [rdi + r12*8]; "
+   	   "mov rbx, [rdi + r14*8]; "
+   	   "mov [rdi + r12*8], rbx; "
+   	   "mov [rdi + r14*8], rax; "
    	"max_is_already_in_back:; "
    	
    	"continue_outer_loop:; "   	
@@ -113,9 +113,10 @@ void squeezeSortAsm( uint64_t arr[], uint64_t n ) {
    	"dec r14; "     // i_back--;
    	"cmp r15, r14; " // 
    	"jl outer_loop; " // while( i_front < i_back ) {} 
-     :                       /* Output   */
+   	
+     :                         /* Output   */
      : "irm" (arr), "U" (n)    /* Input    */
-     : "cc", "memory", "rax", "rbx", "rcx", "rdx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15" );  /* Clobbers */
+     : "cc", "memory", "rdi", "rax", "rbx", "rcx", "rdx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15" );  /* Clobbers */
 
 }
 
@@ -219,12 +220,12 @@ void doRun( size_t n ) {
 	// squeezeSortInC( randomList, n ) ;
 	clock_gettime(CLOCK_MONOTONIC, &tend);
 
-	printSampleData( randomList, n ) ;
-	
 	printf("%zu: squeezeSort took about %.5f seconds\n", n, 
            ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
            ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
 
+	printSampleData( randomList, n ) ;
+	
 	free( randomList ) ; 
 }
 
@@ -232,7 +233,7 @@ void doRun( size_t n ) {
 int main() {
 	printf( PROGRAM_NAME "\n" ) ;
 
-   doRun( 4 );
+   doRun( 8 );
    return 0;
 	
 	for( size_t i = 4 ; i < 30 ; i++ ) {
