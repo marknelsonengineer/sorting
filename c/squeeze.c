@@ -66,7 +66,7 @@ void squeezeSortAsm( uint64_t arr[], uint64_t n ) {
 
       "mov r8, [rdi + r9*8]; "
       "cmp r8, r13; "    // if( arr[j] > max_value )
-      "jna not_max; "
+      "jna not_max; "    // IMPORTANT:  Be sure to use unsigned Jumps @see http://unixwiz.net/techtips/x86-jumps.html
          "mov r12, r9; " // max_index = j;
          "mov r13, r8; " // max_value = arr[j];
       "not_max:; "
@@ -118,7 +118,7 @@ void squeezeSortAsm( uint64_t arr[], uint64_t n ) {
       "jl outer_loop; "
 
      :                         /* Output   */
-     : "irm" (arr), "U" (n)    /* Input    */
+     : "irm" (arr), "irm" (n)  /* Input    */
      : "cc", "memory", "rdi", "rax", "rbx", "rcx", "rdx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15" );  /* Clobbers */
 }
 
@@ -160,7 +160,7 @@ static inline void squeezeSortInC(uint64_t arr[], size_t n) {
          }
       }
 
-      printf( "i_back=%lu  max_index=%lu  max_value=%016lx  i_front=%lu  min_index=%lu  min_value=%016lx\n", i_back, max_index, max_value, i_front, min_index, min_value );
+      printf( "i_back=%lu  max_index=%lu  max_value=%016" PRIx64 "  i_front=%lu  min_index=%lu  min_value=%016" PRIx64 "\n", i_back, max_index, max_value, i_front, min_index, min_value );
 
       if( min_index == max_index ) {
          goto LOOP;
@@ -189,14 +189,14 @@ static inline void squeezeSortInC(uint64_t arr[], size_t n) {
 void printSampleData( uint64_t* randomList, size_t n ) {
    // Print the first 4 samples
    for( size_t i = 0 ; i < 4 ; i++ ) {
-      printf( "%4zu: %016p %016lx\n", i, &randomList[i], randomList[i] ) ;
+      printf( "%4zu: %p %016" PRIx64 "\n", i, &randomList[i], randomList[i] ) ;
    }
 
    printf( "...\n" );
 
    // Print the last 4 samples
    for( size_t i = n - 4 ; i < n ; i++ ) {
-      printf( "%4zu: %016p %016lx\n", i, &randomList[i], randomList[i] ) ;
+      printf( "%4zu: %p %016" PRIx64 "\n", i, &randomList[i], randomList[i] ) ;
    }
 }
 
