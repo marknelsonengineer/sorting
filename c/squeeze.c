@@ -222,7 +222,7 @@ void doRun( size_t n ) {
    // squeezeSortInC( randomList, n ) ;
    clock_gettime(CLOCK_MONOTONIC, &tend);
 
-   printf("%zu: squeezeSort took about %.5f seconds\n", n,
+   printf("%zu: squeezeSort: %.5f seconds\n", n,
            ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) -
            ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
 
