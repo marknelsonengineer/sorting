@@ -1,5 +1,7 @@
 # .gitignore
 
+*.swp
+
 *.s
 
 .DS_Store
