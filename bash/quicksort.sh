@@ -45,7 +45,8 @@ function doRun {
 	start=$(date +%s%N)
 	quicksort randomList 0 $1
 	end=$(date +%s%N)
-	echo "$1: $(($(($end-$start))/1000000)) ms"
+#	echo "$1: quicksort: $(($(($end-$start))/1000000)) ms"
+	echo "$1: quicksort: `bc -l <<< "(${end}-${start})/1000000000"` seconds"
 
 #	for i in "${randomList[@]}"
 #	do
